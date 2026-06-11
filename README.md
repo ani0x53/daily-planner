@@ -1,113 +1,126 @@
-# Daily Planner
+# ✅ Daily Planner — macOS Menubar App
 
-A minimal macOS desktop app to plan your day hour by hour.
+A tiny menubar app that lives in your Mac's top bar. Click the icon, see your day. That's it.
 
-Tasks stay on screen until you check them off. Overdue tasks turn red. That's it.
+No dock icon. No window management. Just your tasks, always one click away.
 
-![Daily Planner](assets/icon.svg)
+<!-- Add a screenshot here after building: ![screenshot](assets/screenshot.png) -->
 
-## Features
+## What You See When You Click
 
-- **Hour-by-hour timeline** from 6 AM to 10 PM
-- **Current hour highlighted** in blue so you always know where you are
-- **Priority levels** — Low, Medium, High, Urgent — each color-coded
-- **Due dates** on every task
-- **Overdue detection** — tasks turn red with an OVERDUE badge when past their hour or due date
-- **Tasks persist** — nothing disappears until you mark it done and remove it
-- **Dark mode** — follows your system setting automatically
-- **macOS native title bar** with traffic light buttons
+| Section | What it shows |
+|---------|--------------|
+| **NOW** | Tasks scheduled for the current hour |
+| **OVERDUE** | Any past tasks you haven't checked off (shown in red, pulsing dot) |
+| **NEXT UP** | Your upcoming tasks for the rest of the day |
+| **FULL DAY** | Expandable hour-by-hour timeline (6 AM – 10 PM) |
 
-## Prerequisites
+Every task shows its **priority** (Low / Medium / High / Urgent, color-coded) and **due date**.
 
-You need **Node.js** (version 18 or later) and **npm** installed.
+Tasks don't disappear until you check them off. Overdue tasks stay red and visible until done.
 
-If you don't have Node.js, install it from [nodejs.org](https://nodejs.org/) or via Homebrew:
+## Keyboard Shortcut
 
-```bash
-brew install node
-```
-
-Verify your installation:
-
-```bash
-node --version   # should print v18.x.x or higher
-npm --version    # should print 9.x.x or higher
-```
+Press **⌘⇧P** (Cmd+Shift+P) anywhere to toggle the planner open/closed.
 
 ## Installation
 
-### 1. Clone the repo
+### Prerequisites
+
+**Node.js 18+** is required. If you don't have it:
+
+```bash
+# Option A: Homebrew (recommended)
+brew install node
+
+# Option B: Download from https://nodejs.org
+```
+
+Verify:
+
+```bash
+node --version   # v18+ required
+npm --version
+```
+
+### Run from source
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/daily-planner.git
 cd daily-planner
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
-```
-
-This installs Electron and electron-builder. It may take a minute on the first run.
-
-### 3. Run the app
-
-```bash
 npm start
 ```
 
-The app window will open. You're done.
+A checklist icon appears in your menubar. Click it. Done.
 
-## Building a distributable .app / .dmg
+### Build a standalone .app
 
-To package the app as a standalone macOS application you can share:
+To build a distributable macOS app you can drag to Applications:
 
 ```bash
 npm run build
 ```
 
-The built app will appear in the `dist/` folder. You'll find both a `.dmg` installer and a `.zip` archive.
+Find the `.app` and `.dmg` in the `dist/` folder. Double-click the `.dmg`, drag Daily Planner to Applications, and it'll be there every time you log in.
 
-To build only a `.dmg`:
+### Auto-start on login (optional)
 
-```bash
-npm run build-dmg
-```
-
-### Adding a custom app icon
-
-Replace `assets/icon.png` with a 512×512 (or 1024×1024) PNG of your icon, then rebuild.
+After installing, open **System Settings → General → Login Items** and add Daily Planner so it launches automatically when you start your Mac.
 
 ## Usage
 
 | Action | How |
-|---|---|
-| **Add a task** | Click `+ add` on any hour slot |
-| **Set priority** | Pick from the dropdown when adding (Low / Medium / High / Urgent) |
-| **Set due date** | Pick a date when adding — defaults to today |
-| **Mark done** | Click the checkbox — task gets a strikethrough and turns green |
-| **Remove a task** | Mark it done first, then click the × button |
-| **Clear all done** | Click the "Clear completed" button at the bottom |
+|--------|-----|
+| **Open/close** | Click menubar icon or press ⌘⇧P |
+| **Add a task** | Click `+ Quick Add` or expand Full Day and click `+ add` on any hour |
+| **Set priority** | Choose Low / Medium / High / Urgent when adding |
+| **Set due date** | Pick a date — defaults to today |
+| **Mark done** | Click the checkbox — task gets a strikethrough |
+| **Remove** | Check it off first, then click × |
+| **Clear all done** | Click "Clear N done" in the bottom bar |
+| **View full schedule** | Click the ▸ arrow next to FULL DAY |
 
-Tasks are saved to your local storage automatically and persist between sessions.
+The popup automatically closes when you click anywhere else on screen.
 
-## Project structure
+## How It Works
+
+The entire app is three files:
 
 ```
 daily-planner/
-├── main.js          # Electron main process (window setup)
-├── index.html       # The entire app UI (single file, no build step)
-├── package.json     # Dependencies and build config
+├── main.js        # Electron: tray icon, popup window positioning
+├── index.html     # The entire UI — zero build tools, no framework
+├── package.json   # Dependencies and build config
 ├── assets/
-│   └── icon.svg     # App icon
+│   └── icon.svg
 ├── LICENSE
 └── README.md
 ```
 
+Tasks are stored in `localStorage` on your machine. Nothing is sent anywhere.
+
+## Dark Mode
+
+Automatically follows your macOS appearance setting. No toggle needed.
+
+## Customization
+
+**Change the keyboard shortcut:** Edit `main.js`, find `CommandOrControl+Shift+P`, replace with your preferred combo.
+
+**Change the window size:** Edit `main.js`, adjust `width: 360, height: 520`.
+
+**Change the hours shown:** Edit `index.html`, find `Array.from({ length: 17 }, (_, i) => i + 6)` — change `17` (number of hours) and `6` (start hour).
+
+## Tech Stack
+
+- [Electron](https://www.electronjs.org/) — native macOS window and tray
+- Vanilla HTML/CSS/JS — no React, no build step, no bundler
+- `localStorage` — tasks persist locally
+
 ## Contributing
 
-PRs welcome. Keep it simple — the whole app is one HTML file on purpose.
+PRs welcome. The whole UI is one HTML file on purpose — keep it simple.
 
 ## License
 

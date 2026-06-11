@@ -1,7 +1,7 @@
 {
   "name": "daily-planner",
   "version": "1.0.0",
-  "description": "A minimal macOS desktop app to plan your day hour by hour. Tasks stay until done, overdue tasks turn red.",
+  "description": "A macOS menubar app to plan your day hour by hour. Lives in your system tray — one click to see what's now, next, and overdue.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -16,25 +16,21 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.dailyplanner.app",
+    "appId": "com.dailyplanner.menubar",
     "productName": "Daily Planner",
     "mac": {
       "category": "public.app-category.productivity",
       "target": ["dmg", "zip"],
       "icon": "assets/icon.png"
     },
-    "win": {
-      "target": "nsis",
-      "icon": "assets/icon.png"
-    },
-    "linux": {
-      "target": "AppImage",
-      "icon": "assets/icon.png"
-    },
     "files": [
       "main.js",
       "index.html",
       "assets/**/*"
+    ],
+    "extraResources": [
+      { "from": "assets/trayTemplate.png", "to": "assets/trayTemplate.png" },
+      { "from": "assets/trayTemplate@2x.png", "to": "assets/trayTemplate@2x.png" }
     ]
   }
 }

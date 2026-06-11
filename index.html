@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Planner</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #ffffff;
+    --text: #111111;
+    --text2: #666666;
+    --text3: #aaaaaa;
+    --border: #e5e5e5;
+    --hover: #f5f5f5;
+    --accent: #2563eb;
+    --accent-bg: rgba(37,99,235,0.05);
+    --done-bg: rgba(34,197,94,0.06);
+    --done: #22c55e;
+    --overdue: #dc2626;
+    --overdue-bg: rgba(220,38,38,0.06);
+    --overdue-border: rgba(220,38,38,0.2);
+    --input-bg: #ffffff;
+    --card-bg: rgba(0,0,0,0.025);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --text: #e5e5e5;
+      --text2: #999999;
+      --text3: #555555;
+      --border: #333333;
+      --hover: #252525;
+      --accent: #3b82f6;
+      --accent-bg: rgba(59,130,246,0.08);
+      --done-bg: rgba(34,197,94,0.08);
+      --done: #22c55e;
+      --overdue: #f87171;
+      --overdue-bg: rgba(220,38,38,0.1);
+      --overdue-border: rgba(220,38,38,0.3);
+      --input-bg: #252525;
+      --card-bg: rgba(255,255,255,0.04);
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-app-region: drag;
+    user-select: none;
+    overflow-y: auto;
+    height: 100vh;
+  }
+
+  .container {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 48px 20px 24px;
+    -webkit-app-region: no-drag;
+  }
+
+  .header { margin-bottom: 20px; padding: 0 4px; }
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .header .date { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+  .hour-row {
+    display: flex;
+    gap: 0;
+    min-height: 44px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    border-left: 3px solid transparent;
+    transition: background 0.15s;
+  }
+  .hour-row.current {
+    border-left-color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  .hour-label {
+    width: 52px;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    padding-top: 3px;
+  }
+  .hour-row.current .hour-label { color: var(--accent); }
+
+  .hour-tasks { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+
+  /* Task card */
+  .task {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--card-bg);
+    border: 1px solid transparent;
+  }
+  .task.overdue {
+    background: var(--overdue-bg);
+    border-color: var(--overdue-border);
+  }
+  .task.done { background: var(--done-bg); }
+
+  .checkbox {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #fff;
+    transition: all 0.15s;
+  }
+  .checkbox:hover { border-color: var(--accent); }
+  .task.done .checkbox { background: var(--done); border-color: var(--done); }
+
+  .task-content { flex: 1; min-width: 0; }
+  .task-title { font-size: 13px; font-weight: 500; }
+  .task.done .task-title { text-decoration: line-through; color: var(--text3); }
+  .task.overdue .task-title { color: var(--overdue); }
+
+  .task-meta { display: flex; gap: 8px; margin-top: 1px; }
+  .task-meta span { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+  .task-due { color: var(--text3) !important; font-weight: 400 !important; }
+
+  .priority-low { color: #6b7280; }
+  .priority-medium { color: #2563eb; }
+  .priority-high { color: #f59e0b; }
+  .priority-urgent { color: #dc2626; }
+
+  .overdue-badge { font-size: 9px; color: var(--overdue); font-weight: 700; flex-shrink: 0; letter-spacing: 0.5px; }
+
+  .remove-btn {
+    font-size: 16px; color: var(--text3); cursor: pointer; flex-shrink: 0;
+    line-height: 1; border: none; background: none; padding: 0 2px;
+  }
+  .remove-btn:hover { color: var(--overdue); }
+
+  .add-btn {
+    font-size: 11px;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 2px 0;
+  }
+  .add-btn:hover { color: var(--accent); }
+
+  /* Add form */
+  .add-form { display: flex; flex-direction: column; gap: 6px; padding: 4px 0; }
+  .add-form input, .add-form select {
+    font-size: 12px;
+    padding: 5px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+  }
+  .add-form input:focus, .add-form select:focus { border-color: var(--accent); }
+  .form-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .btn-add {
+    font-size: 11px; padding: 4px 14px; border-radius: 4px; border: none;
+    background: var(--accent); color: #fff; cursor: pointer; font-weight: 600; font-family: inherit;
+  }
+  .btn-cancel {
+    font-size: 11px; padding: 4px 10px; border-radius: 4px;
+    border: 1px solid var(--border); background: transparent; cursor: pointer;
+    color: var(--text2); font-family: inherit;
+  }
+
+  .clear-done {
+    display: block;
+    margin: 16px auto 0;
+    font-size: 11px;
+    color: var(--text3);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 5px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .clear-done:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+const HOURS = Array.from({ length: 17 }, (_, i) => i + 6);
+const PRIORITIES = ["Low", "Medium", "High", "Urgent"];
+const STORAGE_KEY = "daily-planner-tasks";
+
+let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+let addingHour = null;
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function fmtHour(h) {
+  const s = h >= 12 ? "PM" : "AM";
+  const hr = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return hr + " " + s;
+}
+
+function isOverdue(task) {
+  if (task.done) return false;
+  const now = new Date();
+  const taskDate = new Date(task.dueDate + "T00:00:00");
+  const todayDate = new Date(todayStr() + "T00:00:00");
+  if (taskDate < todayDate) return true;
+  if (taskDate.getTime() === todayDate.getTime() && now.getHours() > task.hour) return true;
+  return false;
+}
+
+function render() {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const dateStr = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
+  let html = `
+    <div class="header" style="-webkit-app-region: drag">
+      <h1>Daily Plan</h1>
+      <div class="date">${dateStr} · ${timeStr}</div>
+    </div>
+  `;
+
+  HOURS.forEach(hour => {
+    const isCurrent = currentHour === hour;
+    const hourTasks = tasks.filter(t => t.hour === hour);
+
+    html += `<div class="hour-row ${isCurrent ? "current" : ""}">`;
+    html += `<div class="hour-label">${fmtHour(hour)}</div>`;
+    html += `<div class="hour-tasks">`;
+
+    hourTasks.forEach(task => {
+      const overdue = isOverdue(task);
+      const cls = task.done ? "done" : overdue ? "overdue" : "";
+      html += `
+        <div class="task ${cls}">
+          <div class="checkbox" onclick="toggleTask('${task.id}')">${task.done ? "✓" : ""}</div>
+          <div class="task-content">
+            <div class="task-title">${esc(task.title)}</div>
+            <div class="task-meta">
+              <span class="priority-${task.priority.toLowerCase()}">${task.priority}</span>
+              <span class="task-due">Due ${task.dueDate}</span>
+            </div>
+          </div>
+          ${overdue && !task.done ? '<span class="overdue-badge">OVERDUE</span>' : ""}
+          ${task.done ? `<button class="remove-btn" onclick="removeTask('${task.id}')" title="Remove">×</button>` : ""}
+        </div>
+      `;
+    });
+
+    if (addingHour === hour) {
+      html += `
+        <div class="add-form">
+          <input id="task-input" placeholder="Task name..." onkeydown="if(event.key==='Enter')addTask(${hour})" autofocus />
+          <div class="form-row">
+            <select id="task-priority">
+              ${PRIORITIES.map(p => `<option value="${p}" ${p === "Medium" ? "selected" : ""}>${p}</option>`).join("")}
+            </select>
+            <input type="date" id="task-due" value="${todayStr()}" />
+            <button class="btn-add" onclick="addTask(${hour})">Add</button>
+            <button class="btn-cancel" onclick="cancelAdd()">Cancel</button>
+          </div>
+        </div>
+      `;
+    } else {
+      html += `<div class="add-btn" onclick="showAdd(${hour})">+ add</div>`;
+    }
+
+    html += `</div></div>`;
+  });
+
+  const doneCount = tasks.filter(t => t.done).length;
+  if (doneCount > 0) {
+    html += `<button class="clear-done" onclick="clearDone()">Clear ${doneCount} completed task${doneCount > 1 ? "s" : ""}</button>`;
+  }
+
+  document.getElementById("app").innerHTML = html;
+
+  if (addingHour !== null) {
+    const inp = document.getElementById("task-input");
+    if (inp) inp.focus();
+  }
+}
+
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function showAdd(hour) {
+  addingHour = hour;
+  render();
+}
+
+function cancelAdd() {
+  addingHour = null;
+  render();
+}
+
+function addTask(hour) {
+  const title = document.getElementById("task-input").value.trim();
+  if (!title) return;
+  const priority = document.getElementById("task-priority").value;
+  const dueDate = document.getElementById("task-due").value;
+  tasks.push({ id: Date.now().toString(), hour, title, priority, dueDate, done: false });
+  save();
+  addingHour = null;
+  render();
+}
+
+function toggleTask(id) {
+  const t = tasks.find(t => t.id === id);
+  if (t) t.done = !t.done;
+  save();
+  render();
+}
+
+function removeTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  save();
+  render();
+}
+
+function clearDone() {
+  tasks = tasks.filter(t => !t.done);
+  save();
+  render();
+}
+
+// Initial render + tick every 30s
+render();
+setInterval(render, 30000);
+</script>
+</body>
+</html>

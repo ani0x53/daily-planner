@@ -1,0 +1,40 @@
+{
+  "name": "daily-planner",
+  "version": "1.0.0",
+  "description": "A minimal macOS desktop app to plan your day hour by hour. Tasks stay until done, overdue tasks turn red.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac",
+    "build-dmg": "electron-builder --mac dmg",
+    "build-all": "electron-builder --mac --win --linux"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.dailyplanner.app",
+    "productName": "Daily Planner",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": ["dmg", "zip"],
+      "icon": "assets/icon.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "assets/**/*"
+    ]
+  }
+}
